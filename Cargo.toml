@@ -6,6 +6,7 @@ build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
 [dependencies]
 bevy_prototype_lyon = "0.5.0"
 rand = "0.8.4"
@@ -27,4 +28,6 @@ features = [
   "bevy_core_pipeline", # Higher-level rendering abstractions
   "bevy_sprite",        # 2D (sprites) rendering
   "bevy_pbr",           # 3D (physically-based) rendering
+  "bevy_text",
+  "bevy_ui"
 ]

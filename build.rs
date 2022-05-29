@@ -1,4 +1,9 @@
-// Example custom build script.
+use std::env;
+
 fn main() {
-    println!("cargo:rustc-link-arg=-lm");
+    let target = env::var("TARGET").unwrap();
+
+    if !target.contains("wasm") {
+        println!("cargo:rustc-link-arg=-lm"); // cant use a LLD args for the wasm linker :P
+    }
 }

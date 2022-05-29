@@ -10,6 +10,12 @@ use astroids::game;
 fn main() {
     let mut app = App::new();
     app.insert_resource(ClearColor(Color::rgb(0., 0., 0.)))
+        .insert_resource(WindowDescriptor {
+            title: "Asteroids".to_string(),
+            width: 1000.,
+            height: 600.,
+            ..default()
+        })
         .add_plugins(DefaultPlugins);
 
     app.add_plugin(ShapePlugin)
@@ -23,4 +29,5 @@ fn main() {
 /// Add camera to world
 fn setup_camera(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn_bundle(UiCameraBundle::default());
 }

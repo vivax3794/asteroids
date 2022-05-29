@@ -103,6 +103,7 @@ fn handle_movement_inputs(
 fn handle_rotation_inputs(
     time: Res<Time>,
     keyboard: Res<Input<KeyCode>>,
+    mouse: Res<Input<MouseButton>>,
     mut query: Query<&mut Transform, With<Player>>,
 ) {
     let mut trans = query.single_mut();
@@ -115,6 +116,10 @@ fn handle_rotation_inputs(
         angle += 3.14 * time.delta_seconds();
     }
 
+    if mouse.pressed(MouseButton::Right) {
+        angle /= 2.0;
+    }
+
     trans.rotate(Quat::from_axis_angle(Vec3::Z, angle))
 }
 
@@ -125,11 +130,11 @@ fn detect_defeat(
     let (player_trans, HitBox(player_hitbox)) = player_query.single();
 
     for (astroid_trans, Asteroid { size: _, points }) in asteroid_query.iter() {
-        if AsteroidBundle::detect_collison(astroid_trans, points, player_trans, *player_hitbox) {
-            println!("YOU DEAD!"); // TODO: restart menu?
+        if AsteroidBundle::detect_collison(astroid_trans, &points, player_trans, *player_hitbox) {
+            // println!("YOU DEAD!"); // TODO: restart menu?
             return;
         }
     }
 
-    println!("you alive");
+    // println!("you alive");
 }

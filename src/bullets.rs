@@ -4,6 +4,7 @@ use bevy_prototype_lyon::entity::ShapeBundle;
 use bevy_prototype_lyon::prelude::*;
 
 use crate::asteroids::AsteroidBundle;
+use crate::score::Score;
 use crate::ship::Player;
 use crate::{asteroids::Asteroid, labels::AstroidSystemLabel};
 
@@ -93,6 +94,7 @@ fn handle_despawning_bullets(
 
 fn detect_collison(
     mut commands: Commands,
+    mut score: ResMut<Score>,
     bullet_query: Query<(Entity, &Transform, &HitBox), With<Bullet>>,
     asteroid_query: Query<(Entity, &Transform, &Asteroid)>,
 ) {
@@ -106,9 +108,10 @@ fn detect_collison(
             },
         ) in asteroid_query.iter()
         {
-            if AsteroidBundle::detect_collison(ast_pos, points, bullet_pos, *bullet_hitbox) {
+            if AsteroidBundle::detect_collison(ast_pos, &points, bullet_pos, *bullet_hitbox) {
                 commands.entity(bullet_entity).despawn();
                 AsteroidBundle::break_apart(&mut commands, ast_entity, *ast_size, ast_pos);
+                score.increment(*ast_size as i32);
                 break;
             }
         }

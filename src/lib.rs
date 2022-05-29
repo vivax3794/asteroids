@@ -7,4 +7,5 @@ pub use labels::AstroidSystemLabel;
 pub mod asteroids;
 pub mod bullets;
 pub mod physics_engine;
+pub mod score;
 pub mod ship;
