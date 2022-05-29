@@ -22,12 +22,12 @@ rustflags = ["-C", "link-arg=-fuse-ld=/opt/homebrew/bin/zld", "-Zshare-generics=
 [target.x86_64-pc-windows-msvc]
 # linker = "rust-lld.exe"
 # linker = "lld"
-rustflags = [
+# rustflags = [
   # "-Zshare-generics=n",
-  "-Lnative=~/sdk/xwin/crt/lib/x86_64",
-  "-Lnative=~/sdk/xwin/sdk/lib/um/x86_64",
-  "-Lnative=~/sdk/xwin/sdk/lib/ucrt/x86_64"
-]
+#  "-Lnative=~/sdk/xwin/crt/lib/x86_64",
+#  "-Lnative=~/sdk/xwin/sdk/lib/um/x86_64",
+#  "-Lnative=~/sdk/xwin/sdk/lib/ucrt/x86_64"
+#]
 
 # Optional: Uncommenting the following improves compile times, but reduces the amount of debug info to 'line number tables only'
 # In most cases the gains are negligible, but if you are on macos and have slow compile times you should see significant gains.
