@@ -1,7 +1,7 @@
 #![windows_subsystem = "windows"]
 
 use bevy;
-use bevy::prelude::*;
+use bevy::{prelude::*, winit::WinitSettings};
 use bevy_prototype_lyon::prelude::*;
 
 use astroids::game;
@@ -9,7 +9,8 @@ use astroids::game;
 /// Create app
 fn main() {
     let mut app = App::new();
-    app.insert_resource(ClearColor(Color::rgb(0., 0., 0.)))
+    app.insert_resource(WinitSettings::game())
+        .insert_resource(ClearColor(Color::rgb(0., 0., 0.)))
         .insert_resource(WindowDescriptor {
             title: "Asteroids".to_string(),
             width: 1000.,

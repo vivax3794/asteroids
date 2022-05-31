@@ -2,15 +2,23 @@ use bevy;
 use bevy::prelude::*;
 use bevy_prototype_lyon::entity::ShapeBundle;
 use bevy_prototype_lyon::prelude::*;
+use iyes_loopless::prelude::*;
 use rand::Rng;
 
 use super::physics_engine::{ScreenWrap, Velocity};
+use crate::{ship::Player, GameState};
 
 pub struct AsteroidsPlugin;
 
 impl Plugin for AsteroidsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(generate_asteroids);
+        app.add_exit_system(GameState::DeadScreen, cleanup_asteroids);
+        app.add_exit_system(
+            GameState::DeadScreen,
+            generate_asteroids.after(cleanup_asteroids),
+        )
+        .add_system(respawn_asterpods.run_in_state(GameState::Gameplay));
     }
 }
 
@@ -69,13 +77,21 @@ impl AsteroidBundle {
         }
     }
 
-    pub fn new_random((width, height): (f32, f32), size: f32) -> Self {
+    pub fn new_random((width, height): (f32, f32), size: f32, player_pos: Vec2) -> Self {
         let mut rng = rand::thread_rng();
-        let trans = Transform::from_translation(Vec3::new(
-            rng.gen_range(-width / 2.0..width / 2.0),
-            rng.gen_range(-height / 2.0..height / 2.0),
-            0.03,
-        ));
+
+        let mut trans;
+        loop {
+            trans = Transform::from_translation(Vec3::new(
+                rng.gen_range(-width / 2.0..width / 2.0),
+                rng.gen_range(-height / 2.0..height / 2.0),
+                0.03,
+            ));
+
+            if trans.translation.truncate().distance(player_pos) >= 200.0 {
+                break;
+            }
+        }
 
         let vel = vector_from_angle(rng.gen_range(0.0..6.28)) * rng.gen_range(50.0..150.0);
 
@@ -147,6 +163,33 @@ fn generate_asteroids(mut commands: Commands, windows: Res<Windows>) {
         commands.spawn_bundle(AsteroidBundle::new_random(
             (width, height),
             rand::thread_rng().gen_range(60.0..90.0),
+            Vec2::ZERO,
         ));
+    }
+}
+
+fn cleanup_asteroids(mut commands: Commands, query: Query<Entity, With<Asteroid>>) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
+    }
+}
+
+fn respawn_asterpods(
+    mut commands: Commands,
+    windows: Res<Windows>,
+    query: Query<(), With<Asteroid>>,
+    player_query: Query<&Transform, With<Player>>,
+) {
+    if query.is_empty() {
+        let window = windows.get_primary().unwrap();
+        let width = window.width();
+        let height = window.height();
+        for _i in 0..5 {
+            commands.spawn_bundle(AsteroidBundle::new_random(
+                (width, height),
+                rand::thread_rng().gen_range(60.0..90.0),
+                player_query.single().translation.truncate(),
+            ));
+        }
     }
 }

@@ -4,12 +4,14 @@ use bevy;
 use bevy::prelude::*;
 use bevy_prototype_lyon::entity::ShapeBundle;
 use bevy_prototype_lyon::prelude::*;
+use iyes_loopless::prelude::*;
 
 use crate::asteroids::{Asteroid, AsteroidBundle};
-use crate::physics_engine::HitBox;
+use crate::physics_engine::{ForwardAcceleration, HitBox};
 
 use super::physics_engine;
 use super::AstroidSystemLabel;
+use crate::GameState;
 
 pub struct PlayerPlugin;
 
@@ -18,15 +20,18 @@ impl Plugin for PlayerPlugin {
         app.add_startup_system(setup_player)
             .add_system(
                 handle_movement_inputs
+                    .run_in_state(GameState::Gameplay)
                     .label(AstroidSystemLabel::Input)
                     .before(AstroidSystemLabel::Physics),
             )
             .add_system(
                 handle_rotation_inputs
+                    .run_in_state(GameState::Gameplay)
                     .label(AstroidSystemLabel::Input)
                     .before(AstroidSystemLabel::Physics),
             )
-            .add_system(detect_defeat);
+            .add_system(detect_defeat.run_in_state(GameState::Gameplay))
+            .add_exit_system(GameState::DeadScreen, reset_player);
     }
 }
 
@@ -44,6 +49,11 @@ fn setup_player(mut commands: Commands) {
                 ));
             }),
     );
+}
+
+fn reset_player(mut query: Query<&mut Transform, With<Player>>) {
+    let mut trans = query.single_mut();
+    *trans = Transform::default();
 }
 
 #[derive(Component)]
@@ -124,14 +134,16 @@ fn handle_rotation_inputs(
 }
 
 fn detect_defeat(
-    player_query: Query<(&Transform, &HitBox), With<Player>>,
+    mut commands: Commands,
+    mut player_query: Query<(&Transform, &HitBox, &mut ForwardAcceleration), With<Player>>,
     asteroid_query: Query<(&Transform, &Asteroid), With<Asteroid>>,
 ) {
-    let (player_trans, HitBox(player_hitbox)) = player_query.single();
+    let (player_trans, HitBox(player_hitbox), mut acc) = player_query.single_mut();
 
     for (astroid_trans, Asteroid { size: _, points }) in asteroid_query.iter() {
         if AsteroidBundle::detect_collison(astroid_trans, &points, player_trans, *player_hitbox) {
-            // println!("YOU DEAD!"); // TODO: restart menu?
+            commands.insert_resource(NextState(GameState::DeadScreen));
+            acc.0 = 0.0;
             return;
         }
     }

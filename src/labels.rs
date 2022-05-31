@@ -6,3 +6,10 @@ pub enum AstroidSystemLabel {
     Input,
     Physics,
 }
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub enum GameState {
+    MainMenu,
+    Gameplay,
+    DeadScreen,
+}

@@ -2,11 +2,12 @@ use bevy;
 use bevy::prelude::*;
 use bevy_prototype_lyon::entity::ShapeBundle;
 use bevy_prototype_lyon::prelude::*;
+use iyes_loopless::prelude::*;
 
 use crate::asteroids::AsteroidBundle;
 use crate::score::Score;
 use crate::ship::Player;
-use crate::{asteroids::Asteroid, labels::AstroidSystemLabel};
+use crate::{asteroids::Asteroid, labels::AstroidSystemLabel, GameState};
 
 use super::physics_engine::{HitBox, Velocity};
 
@@ -14,9 +15,13 @@ pub struct BulletPlugin;
 
 impl Plugin for BulletPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(shoot_bullets.label(AstroidSystemLabel::Input))
-            .add_system(handle_despawning_bullets)
-            .add_system(detect_collison);
+        app.add_system(
+            shoot_bullets
+                .run_in_state(GameState::Gameplay)
+                .label(AstroidSystemLabel::Input),
+        )
+        .add_system(handle_despawning_bullets)
+        .add_system(detect_collison);
     }
 }
 

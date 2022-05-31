@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use iyes_loopless::prelude::*;
+
+use crate::GameState;
 
 pub struct ScorePlugin;
 
@@ -6,7 +9,8 @@ impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Score::new())
             .add_startup_system(create_score_text)
-            .add_system(update_score);
+            .add_system(update_score.run_in_state(GameState::Gameplay))
+            .add_enter_system(GameState::Gameplay, reset_score);
     }
 }
 
@@ -45,7 +49,7 @@ fn create_score_text(mut commands: Commands, asset_server: Res<AssetServer>) {
             text: Text {
                 sections: vec![
                     TextSection {
-                        value: "score: ".to_string(),
+                        value: "score:".to_string(),
                         style: style.clone(),
                     },
                     TextSection {
@@ -78,4 +82,8 @@ fn update_score(score: Res<Score>, mut query: Query<&mut Text, With<ScoreText>>)
         let mut score_text = query.single_mut();
         score_text.sections[1].value = format!("{}", score.value());
     }
+}
+
+fn reset_score(mut score: ResMut<Score>) {
+    score.reset();
 }
